@@ -1,0 +1,116 @@
+
+# Capital Bikeshare Ride Analysis (2024)
+# Author: Lauren Vaninger
+
+import pandas as pd
+import plotly.express as px
+
+# Load dataset
+bike_rides = pd.read_csv("datasets/2024_capital_bikeshare.csv")
+
+# TASK 1: DATA EXPLORATION
+
+print("Dataset Dimensions:")
+print(bike_rides.shape)
+
+print("\nDataset Information:")
+bike_rides.info()
+
+print("\nMissing Values:")
+print(bike_rides.isnull().sum())
+
+print("\nAverage Trip Duration:")
+print(bike_rides["trip_duration_min"].mean())
+
+# TASK 2: STATION USAGE
+
+print("\nUnique Starting Stations:")
+print(bike_rides["start_station_name"].nunique())
+
+print("\nTop 5 Starting Stations:")
+print(bike_rides["start_station_name"].value_counts().head(5))
+
+print("\nTop 5 Destination Stations:")
+print(bike_rides["end_station_name"].value_counts().head(5))
+
+# TASK 3: RIDERSHIP BY DAY
+
+day_order = [
+    "Monday", "Tuesday", "Wednesday",
+    "Thursday", "Friday", "Saturday", "Sunday"
+]
+
+px.histogram(
+    bike_rides,
+    x="trip_day",
+    category_orders={"trip_day": day_order},
+    title="Number of Bike Rides by Day of the Week",
+    labels={
+        "trip_day": "Day of the Week",
+        "count": "Number of Rides"
+    }
+).show()
+
+# RIDERSHIP BY HOUR
+
+px.histogram(
+    bike_rides,
+    x="start_hour",
+    title="Number of Bike Rides by Hour",
+    labels={
+        "start_hour": "Hour of Day",
+        "count": "Number of Rides"
+    }
+).show()
+
+# TASK 4: MEMBER TYPE ANALYSIS
+
+print("\nRides by Membership Type:")
+print(bike_rides["member_type"].value_counts())
+
+# March and April ridership
+bike_rides["started_at"] = pd.to_datetime(
+    bike_rides["started_at"]
+)
+
+march_april = bike_rides[
+    bike_rides["started_at"].dt.month.isin([3, 4])
+]
+
+print("\nMarch and April Membership Breakdown:")
+print(march_april["member_type"].value_counts())
+
+# TRIP DURATION
+
+print("\nShortest Trip:")
+print(bike_rides["trip_duration_min"].min())
+
+print("\nLongest Trip:")
+print(bike_rides["trip_duration_min"].max())
+
+print("\nMedian Trip Duration:")
+print(bike_rides["trip_duration_min"].median())
+
+# LEVEL UP: LEAST-USED STATIONS
+
+least_used_stations = (
+    bike_rides["start_station_name"]
+    .value_counts()
+    .sort_values()
+    .head(20)
+)
+
+print("\n20 Least-Used Starting Stations:")
+print(least_used_stations)
+
+# Calculate proportion of all rides
+unpopular_rides = least_used_stations.sum()
+total_rides = bike_rides.shape[0]
+
+proportion = unpopular_rides / total_rides
+
+print("\nLeast-Used Station Analysis")
+print("Rides:", unpopular_rides)
+print("Total Rides:", total_rides)
+print("Proportion:", proportion)
+print("Percentage:", proportion * 100, "%")
